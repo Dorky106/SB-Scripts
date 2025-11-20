@@ -1,0 +1,71 @@
+Triggers:
+Twitch > Channel Reward > First
+Twitch > Channel Reward > Second
+
+Sub-Actions:
+Add Twitch Boardcaster Information
+Twitch Add Target Info (%broadcastUser%)
+Execute Code
+
+Code:
+using System;
+
+public class CPHInline
+{
+	string first = "Your Reward ID for First"; //Reward ID for first
+	string second = "Your Reward ID for second"; //Reward ID for second
+	
+	string user;
+	string redemptionId;
+	
+	string title;
+	
+	public bool Execute()
+	{
+		//How I deal with harrassment (Can skip this, as I refuse to give this info out)
+		if(CPH.ExecuteMethod("DealWithHarassment", "DealWithThem") == true)
+		{
+			return true;
+		}
+		
+		//Get the Info required to change the title, and mark the redeem as fulfilled or not
+		title = args["targetChannelTitle"].ToString();
+		user = args["user"].ToString();
+		redemptionId = args["redemptionId"].ToString();
+		
+		switch(args["rewardName"].ToString())
+		{
+			case "First":
+				CPH.AddUserToGroup(user, Platform.Twitch, "First");
+				CPH.TwitchRedemptionFulfill(first, redemptionId);
+				CPH.DisableReward(first); //Disable First
+				CPH.EnableReward(second); //Enable Second
+				CPH.SetArgument("RedeemUser", user);
+				CPH.SetArgument("RedeemMsg", "Redeemed First");
+				CPH.SetArgument("RedeemTTS", user + " Redeemed First!");
+				CPH.ExecuteMethod("Alerts", "CastAlert");
+				CPH.SetChannelTitle(title + " - First: " + user);
+				break;
+			case "Second":
+				if(!CPH.UserInGroup(user, Platform.Twitch, "First"))  //Make sure user didn't already claim first
+				{
+					CPH.TwitchRedemptionFulfill(second, redemptionId);
+					CPH.DisableReward(second);
+					CPH.SetArgument("RedeemUser", user);
+					CPH.SetArgument("RedeemMsg", "Redeemed Second");
+					CPH.SetArgument("RedeemTTS", user + " Redeemed Second!");
+					CPH.ExecuteMethod("Alerts", "CastAlert");
+					CPH.SetChannelTitle(title + " - First: " + user);
+					CPH.SetChannelTitle(title + ", Second:" + user);
+				}
+				else
+				{
+					CPH.TwitchRedemptionCancel(second, redemptionId);  //Refunds channel points
+					CPH.SendMessage(user + " Can't redeem both first and second", true);  //Message to the user
+				}
+				break;
+		};
+		//CPH.ObsSetGdiText("O-Alerts", "AlertTxt", "", 0);
+		return true;
+	}
+}
