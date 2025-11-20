@@ -1,0 +1,21 @@
+Triggers:
+OBS Studio Started
+
+Sub-Actions:
+Execute Code
+
+Cobe:
+using System;
+
+public class CPHInline
+{
+	public bool Execute()
+	{
+		CPH.ClearUsersFromGroup("First");  //Clear out the group, so First can be claimed again
+		CPH.ClearUsersFromGroup("Lurking");  //Clear out the group, allowing people to use the lurk command again
+
+		CPH.EnableReward("Reward ID for First"); // First
+		CPH.DisableReward("Reward ID for Second"); //Second
+		return true;
+	}
+}
