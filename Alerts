@@ -1,0 +1,28 @@
+Triggers: None
+Sub-Actions: Execute Code (Alerts)
+
+Code: (Under Settings in Execute Code, set the name to Alerts)
+using System;
+
+public class CPHInline
+{
+	public bool CastAlert()
+	{
+		string user = args["RedeemUser"].ToString();
+		string message = args["RedeemMsg"].ToString();
+		string tts = "";
+		if(CPH.TryGetArg("RedeemTTS", out tts)){ }
+
+		CPH.ObsShowSource("O-Alerts","Alert",0);
+		CPH.Wait(1000);
+		CPH.ObsSetGdiText("O-Alerts", "AlertTxt", user + "\n" + message, 0);
+		CPH.ObsShowSource("O-Alerts","AlertTxt", 0);
+		if(tts != "")
+			CPH.TtsSpeak("Anon", tts);
+		CPH.Wait(8000);
+		CPH.ObsHideSource("O-Alerts","AlertTxt",0);
+		CPH.ObsHideSource("O-Alerts","Alert",0);
+		// your main code goes here
+		return true;
+	}
+}
