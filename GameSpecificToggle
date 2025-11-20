@@ -1,0 +1,35 @@
+Triggers:
+Twitch > General > Stream Update (Any Game and Title)
+
+Sub-Actions:
+Add Twitch Broadcaster Information
+Execute Code
+
+Code:
+using System;
+
+public class CPHInline
+{
+    bool UseBot = true; //Set to false if you don't have a bot account linked to streamer bot.
+    //Variables for all Commands/Redeems
+    string NameACharacter = "Reward ID for Name a Character";
+    //Etc
+
+    public bool Execute()
+    {
+        CPH.DisableCommand("Variable Name"); //Remove the quotes and insert the variable of a command you want to disable, copy and paste code till all commands you want disabled are disabled
+        CPH.DisableReward("Variable Name"); //Same as above just for any rewards you want disabled
+
+        switch (args["gameName"].ToString()) //Check what category is being used on twitch
+        {
+            case "Cult of the Lamb": //Using Cult of the Lamb as an Example
+                CPH.EnableReward("Variable Name");//Enable any rewards you want for select game
+                CPH.EnableCommand("Variable Name");//Enable any commands you want for select game
+                break;
+            //Just add new cases for any game not in the list.  Just remember to put a break before any new cases.  (Like above)
+            default:
+                CPH.SendMessage(args["gameName"].ToString() + ", currently doesn't exist in Game Specific Toggle list", UseBot);
+                break;
+        }
+    }
+}
