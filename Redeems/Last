@@ -1,0 +1,60 @@
+Triggers
+Twitch > Channel Reward > Last
+OBS Studio Streaming Stopped
+OBS Studio Streaming Started
+
+Sub-Actions:
+Execute Code
+
+Code:
+using System;
+using System.Collections.Generic;
+
+public class CPHInline
+{
+	string rewardID = "Your Reward ID";
+	int startCost = 10; //How much it should cost at the start
+	int increaseCost = 5; //How much to increase every time the redeem happens
+	int currentCost = 0; //How much it currently costs
+	string LastUser = ""; //Last user to claim Last
+	
+	public void Init()
+	{
+		CPH.UpdateRewardCost(rewardID, startCost);
+		currentCost = startCost;
+	}
+
+	public bool Execute()
+	{
+		if(CPH.ExecuteMethod("DealWithHarassment", "DealWithThem") == true)
+		{
+			return true;
+		}
+		if(args["user"].ToString() == LastUser)
+		{
+			CPH.TwitchRedemptionCancel(rewardID,args["redemptionId"].ToString());
+			CPH.SendMessage("Chill out, your already dead last", true, true);
+		}
+		switch(args["__source"].ToString())
+		{
+			case "ObsStreamingStopped":
+				if (LastUser != "")
+					CPH.UpdateRewardPrompt(rewardID, "Last stream the last costed " + currentCost + " redeemed by: " + LastUser);
+				break;
+			case "ObsStreamingStarted":
+				CPH.UpdateRewardCost(rewardID, startCost);
+				break;
+			case "TwitchRewardRedemption":
+				LastUser = args["user"].ToString();
+				CPH.UpdateRewardPrompt(rewardID, LastUser + " spent " + currentCost.ToString() + " to buy this useless reward!");
+				currentCost = currentCost + increaseCost;
+				CPH.UpdateRewardCost(rewardID, currentCost);
+				CPH.SetArgument("RedeemUser", LastUser);
+				CPH.SetArgument("RedeemMsg", "Redeemed Last");
+				CPH.ExecuteMethod("Alerts", "CastAlert");
+				CPH.TwitchRedemptionFulfill(rewardID, args["redemptionId"].ToString());
+				break;
+		}
+		return true;
+	}
+}
