@@ -1,0 +1,59 @@
+Triggers:
+Twitch > Chat > First Words
+
+Sub-Actions:
+Execute Code
+
+Code:
+using Newtonsoft.Json; //This is a .dll you have to download from the Newtonsoft website.
+using System.Collections.Generic;
+using System.IO;
+
+public class CPHInline
+{	
+	public bool Execute()
+	{
+		if (args["userName"].ToString() == "botps9")  //Change botps9 to be your own bot, this is just to ignore anything the bot says
+			return true;
+			
+		// your main code goes here
+		string ret = WelcomeMessage(args["userName"].ToString(), args["userId"].ToString());
+		if (ret == null)
+		{
+			return true;
+		}
+		CPH.SendMessage(ret, true);
+		return true;
+	}
+	
+	public static string WelcomeMessage(string user, string userID)
+	{
+		using (StreamReader sr = new StreamReader(Path.Combine("infoFiles", "Welcome.json")))
+		{
+			string json = sr.ReadToEnd();
+			List<Messages> messages = JsonConvert.DeserializeObject<List<Messages>>(json);
+			foreach (Messages m in messages)
+			{
+				if(m.UserID != null || m.UserID != "")
+				{
+					if (m.UserID == userID)
+					{
+						return m.Message;
+					}
+				}
+				if (m.Name == user)
+				{
+					return m.Message;
+				}
+			}
+		}
+		return null;
+	}
+}
+
+public class Messages
+{
+	public string Name;
+	public string UserID;
+	public string Message;
+}
